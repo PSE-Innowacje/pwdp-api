@@ -1,0 +1,17 @@
+title PWDP B2B API - wersja synchroniczna (REST)
+
+REST Client->B2B REST API: POST /pwdp/api/v1/plannedResourceSchedule
+note left of B2B REST API: SubmitRequest
+B2B REST API->REST Client: SubmitResponse
+
+B2B REST API->Backend service: approveRequest()
+Backend service->Backend service: approvalProcess()
+Backend service->B2B REST API: approvalResult()
+
+opt Processing result polling
+    loop
+        REST Client->B2B REST API: GET /pwdp/api/v1/plannedResourceSchedule/{serverRefId}/status
+        note left of B2B REST API: {serverRefId} from SubtmitResponse
+        B2B REST API->REST Client: ProcessingStatusResponse
+    end
+end

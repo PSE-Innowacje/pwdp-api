@@ -1,0 +1,13 @@
+title PWDP B2B API - wersja asynchroniczna (AMQP)
+
+Async Client->B2B AMQP service: LISTEN to pwdp-api-notification-{{CLIENT_ID}}
+note right of Async Client: Subscribes to notification queue
+Async Client->B2B AMQP service: SEND to pwdp-api-plannedResourceSchedule-submit
+note left of B2B AMQP service: SubmitRequest
+
+B2B AMQP service->Backend service: approveRequest()
+Backend service->Backend service: approvalProcess()
+Backend service->B2B AMQP service: approvalResult()
+
+B2B AMQP service->Async Client: RECEIVE from pwdp-api-notification-{{CLIENT_ID}}
+note left of B2B AMQP service: ProcessingStatusResponse

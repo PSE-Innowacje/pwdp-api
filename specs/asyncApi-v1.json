@@ -1,0 +1,611 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "PWDP B2B API",
+    "version": "1.0.0",
+    "description": "PWDP B2B Async API",
+    "x-generator": "springwolf"
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "rabbitMQ": {
+      "host": "amqp.b2b.pse.pl:5672",
+      "protocol": "amqp",
+      "protocolVersion": "1.0",
+      "description": "RabbitMQ server for testing purposes",
+      "title": "Test RabbitMQ server",
+      "summary": "Test RabbitMQ server",
+      "security": [
+        {
+          "type": "oauth2",
+          "description": "Token JWT do autentykacji i autoryzacji w RabbitMQ do pobrania z Keycloak-a PSE. Wykorzystujemy client_credentials flow.",
+          "flow": "clientCredentials",
+          "tokenUrl": "https://ip.b2b.pse.pl/oauth2/realms/pwdp-b2b-api/protocol/openid-connect/token"
+        }
+      ],
+      "externalDocs": {
+        "description": "Link do dokumentacji",
+        "url": "https://api.b2b.pse.pl/docs/"
+      }
+    }
+  },
+  "channels": {
+    "pwdp-api-notification-{{CLIENT_ID}}": {
+      "address": "pwdp-api-notification-{{CLIENT_ID}}",
+      "messages": {
+        "pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse": {
+          "$ref": "#/components/messages/pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse"
+        }
+      }
+    },
+    "pwdp-api-plannedResourceSchedule-submit": {
+      "address": "pwdp-api-plannedResourceSchedule-submit",
+      "messages": {
+        "pl.pse.psei.pwdp.b2b.api.model.SubmitRequest": {
+          "$ref": "#/components/messages/pl.pse.psei.pwdp.b2b.api.model.SubmitRequest"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProcessingStatusResponseHeader": {
+        "title": "ProcessingStatusResponseHeader",
+        "type": "object",
+        "properties": {
+          "Content-Type": {
+            "type": "string",
+            "description": "Typ wiadomości, np. application/json lub application/xml. Jeśli brak nagłówka, to domyślnie application/json.",
+            "enum": [
+              "application/json"
+            ],
+            "examples": [
+              "application/json"
+            ]
+          }
+        },
+        "description": "Nagłówki w przesłanej wiadomości",
+        "examples": [
+          {
+            "Content-Type": "application/json"
+          }
+        ]
+      },
+      "SubmitRequestHeader": {
+        "title": "SubmitRequestHeader",
+        "type": "object",
+        "properties": {
+          "Client-Id": {
+            "type": "string",
+            "description": "Client ID użytkownika wysyłającego wiadomość",
+            "enum": [
+              "osd-client-id"
+            ],
+            "examples": [
+              "osd-client-id"
+            ]
+          },
+          "Content-Type": {
+            "type": "string",
+            "description": "Typ wiadomości, np. application/json lub application/xml. Jeśli brak nagłówka, to domyślnie application/json.",
+            "enum": [
+              "application/json"
+            ],
+            "examples": [
+              "application/json"
+            ]
+          }
+        },
+        "description": "Wymagane nagłówki do przesłanej wiadomości",
+        "examples": [
+          {
+            "Client-Id": "osd-client-id",
+            "Content-Type": "application/json"
+          }
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.PlannedResource": {
+        "title": "PlannedResource",
+        "type": "object",
+        "properties": {
+          "businessType": {
+            "type": "string",
+            "description": "Typ opisujący serię danych",
+            "enum": [
+              "A01",
+              "P01",
+              "A60",
+              "A61",
+              "P60",
+              "P61",
+              "A04",
+              "A73"
+            ],
+            "examples": [
+              "A60"
+            ]
+          },
+          "measurementUnit": {
+            "type": "string",
+            "description": "Jednostka miary dla wartości",
+            "enum": [
+              "MAW"
+            ],
+            "examples": [
+              "MAW"
+            ]
+          },
+          "mrid": {
+            "type": "string",
+            "description": "Identyfikator mRID serii, unikalny w ramach pliku",
+            "maxLength": 40,
+            "examples": [
+              "1"
+            ]
+          },
+          "registeredResourceMrid": {
+            "type": "string",
+            "description": "Identyfikator mRID obiektu, na który zgłaszane są dane, unikalny",
+            "maxLength": 60,
+            "examples": [
+              "_d8736017-d25d-4952-a3cf-0fa83560e16f"
+            ]
+          },
+          "seriesPeriods": {
+            "type": "array",
+            "description": "Tablica serii danych w podanych okresach",
+            "items": {
+              "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.SeriesPeriod"
+            }
+          }
+        },
+        "description": "Zestaw danych dla wybranego parametru obejmujący wektor (serię) wartości wraz z wielkościami dla wskazanego parametru wybranego obiektu",
+        "examples": [
+          {
+            "businessType": "A60",
+            "measurementUnit": "MAW",
+            "mrid": "1",
+            "registeredResourceMrid": "_d8736017-d25d-4952-a3cf-0fa83560e16f",
+            "seriesPeriods": [
+              {
+                "continuousSeriesPoints": [
+                  1.1
+                ],
+                "resolution": "PT1H",
+                "seriesPoints": [
+                  {
+                    "position": 42,
+                    "quantity": 42.128
+                  }
+                ],
+                "timeInterval": {
+                  "end": "2024-03-22T02:00:00Z",
+                  "start": "2024-03-12T02:00:00Z"
+                }
+              }
+            ]
+          }
+        ],
+        "required": [
+          "businessType",
+          "measurementUnit",
+          "mrid",
+          "registeredResourceMrid"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse": {
+        "title": "ProcessingStatusResponse",
+        "type": "object",
+        "properties": {
+          "clientRefId": {
+            "type": "string",
+            "description": "Opcjonalne ID żądania nadane przez klienta API",
+            "maxLength": 80,
+            "examples": [
+              "4bfa71da-146b-4df9-b972-6a5ce18f2342"
+            ]
+          },
+          "serverRefId": {
+            "type": "string",
+            "description": "Unikalne ID nadane przez system PSE, które służy do identyfikacji procesu przesłania danych",
+            "format": "uuid",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Status operacji przetworzenia przesłanych danych",
+            "enum": [
+              "ACCEPTED",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "examples": [
+              "SUCCESS"
+            ]
+          },
+          "validationViolations": {
+            "type": "array",
+            "description": "Błędy i naruszenia walidacji zgłoszone w czasie przetwarzania przesłanych danych",
+            "items": {
+              "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.ScheduleValidationViolation"
+            }
+          }
+        },
+        "description": "Odpowiedź na zapytanie o status przetwarzania przesłanego dokumentu",
+        "examples": [
+          {
+            "clientRefId": "4bfa71da-146b-4df9-b972-6a5ce18f2342",
+            "serverRefId": "550e8400-e29b-41d4-a716-446655440000",
+            "status": "SUCCESS",
+            "validationViolations": [
+              {
+                "code": "U01",
+                "details": "Dotyczy serii o mRID 84b95902-23c5-46b0-848c-c6ac0d5a4489",
+                "message": "Wartość z grafiku przekracza 100% wartości maksymalnej mocy netto",
+                "severity": "WARN"
+              }
+            ]
+          }
+        ],
+        "required": [
+          "serverRefId",
+          "status"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.ScheduleValidationViolation": {
+        "title": "ScheduleValidationViolation",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Kod naruszenia walidacji powstałego w czasie przetwarzania",
+            "examples": [
+              "U01"
+            ]
+          },
+          "details": {
+            "type": "string",
+            "description": "Szczegóły naruszenia walidacji powstałego w czasie przetwarzania",
+            "examples": [
+              "Dotyczy serii o mRID 84b95902-23c5-46b0-848c-c6ac0d5a4489"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Opis naruszenia walidacji powstałego w czasie przetwarzania",
+            "examples": [
+              "Wartość z grafiku przekracza 100% wartości maksymalnej mocy netto"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "description": "Stopień naruszenia walidacji powstałego w czasie przetwarzania",
+            "enum": [
+              "INFO",
+              "WARN",
+              "ERROR"
+            ],
+            "examples": [
+              "WARN"
+            ]
+          }
+        },
+        "description": "Opis naruszeń walidacji w czasie przetwarzenia przesłanych dokumentów",
+        "examples": [
+          {
+            "code": "U01",
+            "details": "Dotyczy serii o mRID 84b95902-23c5-46b0-848c-c6ac0d5a4489",
+            "message": "Wartość z grafiku przekracza 100% wartości maksymalnej mocy netto",
+            "severity": "WARN"
+          }
+        ],
+        "required": [
+          "message",
+          "severity"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.SeriesPeriod": {
+        "title": "SeriesPeriod",
+        "type": "object",
+        "properties": {
+          "continuousSeriesPoints": {
+            "type": "array",
+            "description": "Lista wartości dla kolejnych punktów w czasie dla zadanego okresu, zgodnie z przyjętą rozdzielczością. UWAGA: Należy zdefiniować albo seriesPoints albo continuousSeriesPoints. Gdy zdefiniowane są oba, serwis zwróci błąd.",
+            "items": {
+              "type": "number",
+              "description": "Lista wartości dla kolejnych punktów w czasie dla zadanego okresu, zgodnie z przyjętą rozdzielczością. UWAGA: Należy zdefiniować albo seriesPoints albo continuousSeriesPoints. Gdy zdefiniowane są oba, serwis zwróci błąd."
+            }
+          },
+          "resolution": {
+            "type": "string",
+            "description": "Rozdzielczość serii danych: PT15M - kwadransowa, PT1H - godzinowa, P1D - dobowa, P1M – miesięczna",
+            "enum": [
+              "PT15M",
+              "PT1H",
+              "P1D",
+              "P1M"
+            ],
+            "examples": [
+              "PT1H"
+            ]
+          },
+          "seriesPoints": {
+            "type": "array",
+            "description": "UWAGA: w przypadku harmonogramu dyspozycyjności nie trzeba podawać kompletu punktów czasowych, jedynie te punkty, w których wartości ulegają zmianie",
+            "items": {
+              "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.SeriesPoint"
+            }
+          },
+          "timeInterval": {
+            "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.TimeInterval"
+          }
+        },
+        "description": "Seria danych w podanym okresie (szereg czasowy)",
+        "examples": [
+          {
+            "continuousSeriesPoints": [
+              1.1
+            ],
+            "resolution": "PT1H",
+            "seriesPoints": [
+              {
+                "position": 42,
+                "quantity": 42.128
+              }
+            ],
+            "timeInterval": {
+              "end": "2024-03-22T02:00:00Z",
+              "start": "2024-03-12T02:00:00Z"
+            }
+          }
+        ],
+        "required": [
+          "resolution",
+          "timeInterval"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.SeriesPoint": {
+        "title": "SeriesPoint",
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "integer",
+            "description": "Kolejny numer pozycji (punktu czasowego), interpertowany w zależności od SeriesPeriod.timeInterval oraz SeriesPeriod.resolution",
+            "format": "int64",
+            "examples": [
+              42
+            ]
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Planowana wielkość, iterpretowana w zależności od PlannedResource.businessType oraz PlannedResource.measurementUnit",
+            "format": "numeryczny [4,3]",
+            "examples": [
+              42.128
+            ]
+          }
+        },
+        "description": "Wartość parametru w danym punkcie czasu (np. na daną godzinę)",
+        "examples": [
+          {
+            "position": 42,
+            "quantity": 42.128
+          }
+        ],
+        "required": [
+          "position",
+          "quantity"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.SubmitRequest": {
+        "title": "SubmitRequest",
+        "type": "object",
+        "properties": {
+          "clientRefId": {
+            "type": "string",
+            "description": "Opcjonalne ID żądania nadane przez klienta API",
+            "maxLength": 80,
+            "examples": [
+              "4bfa71da-146b-4df9-b972-6a5ce18f2342"
+            ]
+          },
+          "plannedResources": {
+            "type": "array",
+            "description": "Typ grafiku",
+            "items": {
+              "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.PlannedResource"
+            }
+          },
+          "schedulePeriod": {
+            "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.TimeInterval"
+          },
+          "type": {
+            "type": "string",
+            "description": "Typ grafiku",
+            "enum": [
+              "A28",
+              "A30",
+              "A71"
+            ],
+            "examples": [
+              "A28"
+            ]
+          }
+        },
+        "description": "Plan pracy lub harmonogram dyspozycyjności",
+        "examples": [
+          {
+            "clientRefId": "4bfa71da-146b-4df9-b972-6a5ce18f2342",
+            "plannedResources": [
+              {
+                "businessType": "A60",
+                "measurementUnit": "MAW",
+                "mrid": "1",
+                "registeredResourceMrid": "_d8736017-d25d-4952-a3cf-0fa83560e16f",
+                "seriesPeriods": [
+                  {
+                    "continuousSeriesPoints": [
+                      1.1
+                    ],
+                    "resolution": "PT1H",
+                    "seriesPoints": [
+                      {
+                        "position": 42,
+                        "quantity": 42.128
+                      }
+                    ],
+                    "timeInterval": {
+                      "end": "2024-03-22T02:00:00Z",
+                      "start": "2024-03-12T02:00:00Z"
+                    }
+                  }
+                ]
+              }
+            ],
+            "schedulePeriod": {
+              "end": "2024-03-22T02:00:00Z",
+              "start": "2024-03-12T02:00:00Z"
+            },
+            "type": "A28"
+          }
+        ],
+        "required": [
+          "plannedResources",
+          "schedulePeriod",
+          "type"
+        ]
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.TimeInterval": {
+        "title": "TimeInterval",
+        "type": "object",
+        "properties": {
+          "end": {
+            "type": "string",
+            "description": "Data końca okresu",
+            "format": "date-time",
+            "examples": [
+              "2024-03-22T02:00:00Z"
+            ]
+          },
+          "start": {
+            "type": "string",
+            "description": "Data początku okresu",
+            "format": "date-time",
+            "examples": [
+              "2024-03-12T02:00:00Z"
+            ]
+          }
+        },
+        "description": "Przedział czasu",
+        "examples": [
+          {
+            "end": "2024-03-22T02:00:00Z",
+            "start": "2024-03-12T02:00:00Z"
+          }
+        ],
+        "required": [
+          "end",
+          "start"
+        ]
+      }
+    },
+    "messages": {
+      "pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse": {
+        "headers": {
+          "$ref": "#/components/schemas/ProcessingStatusResponseHeader"
+        },
+        "payload": {
+          "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+          "schema": {
+            "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse"
+          }
+        },
+        "contentType": "application/json",
+        "name": "ProcessingStatusResponse",
+        "title": "ProcessingStatusResponse",
+        "description": "Informacja o statusie przetwarzenia grafiku",
+        "bindings": {
+          "amqp": {
+            "bindingVersion": "0.3.0"
+          }
+        }
+      },
+      "pl.pse.psei.pwdp.b2b.api.model.SubmitRequest": {
+        "headers": {
+          "$ref": "#/components/schemas/SubmitRequestHeader"
+        },
+        "payload": {
+          "schemaFormat": "application/vnd.aai.asyncapi+json;version=3.0.0",
+          "schema": {
+            "$ref": "#/components/schemas/pl.pse.psei.pwdp.b2b.api.model.SubmitRequest"
+          }
+        },
+        "contentType": "application/json",
+        "name": "SubmitRequest",
+        "title": "SubmitRequest",
+        "description": "Przesłane dane wraz z nagłówkami",
+        "bindings": {
+          "amqp": {
+            "bindingVersion": "0.3.0"
+          }
+        }
+      }
+    }
+  },
+  "operations": {
+    "pwdp-api-notification-{{CLIENT_ID}}_send_notifyClient": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/pwdp-api-notification-{{CLIENT_ID}}"
+      },
+      "title": "pwdp-api-notification-{{CLIENT_ID}}_send",
+      "description": "Wysyła do klienta notyfikację o zmianie statusu przetwarzania przesłanego dokumentu (grafiku / harmonogramu). Dokładka nazwa kolejki jest dedykowana dla klienta i jej nazwa zostanie udostępniona przez PSE.",
+      "bindings": {
+        "amqp": {
+          "expiration": 0,
+          "cc": [ ],
+          "priority": 0,
+          "deliveryMode": 1,
+          "mandatory": false,
+          "bcc": [ ],
+          "timestamp": false,
+          "ack": false,
+          "bindingVersion": "0.3.0"
+        }
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/pwdp-api-notification-{{CLIENT_ID}}/messages/pl.pse.psei.pwdp.b2b.api.model.ProcessingStatusResponse"
+        }
+      ]
+    },
+    "pwdp-api-plannedResourceSchedule-submit_receive_receiveMessage": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/pwdp-api-plannedResourceSchedule-submit"
+      },
+      "title": "pwdp-api-plannedResourceSchedule-submit_receive",
+      "description": "Odbiera przesłany dokument (grafik / harmonogram) i rozpoczyna jego przetwarzanie",
+      "bindings": {
+        "amqp": {
+          "expiration": 0,
+          "cc": [ ],
+          "priority": 0,
+          "deliveryMode": 1,
+          "mandatory": false,
+          "bcc": [ ],
+          "timestamp": false,
+          "ack": false,
+          "bindingVersion": "0.3.0"
+        }
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/pwdp-api-plannedResourceSchedule-submit/messages/pl.pse.psei.pwdp.b2b.api.model.SubmitRequest"
+        }
+      ]
+    }
+  }
+}

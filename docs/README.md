@@ -1,0 +1,1 @@
+Files with *.wsd extensions are sequence diagrams source which can be opened and edited via [Web Sequence Diagrams](https://www.websequencediagrams.com/app)
